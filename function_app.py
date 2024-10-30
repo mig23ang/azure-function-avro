@@ -3,45 +3,44 @@ import azure.functions as func
 import fastavro
 import io
 
-# Asegúrate de tener un esquema Avro que coincida con el que envías desde tu aplicación
 AVRO_SCHEMA = {
-  "type": "record",
-  "name": "ProductosAvro",
-  "namespace": "org.productos.avro",
-  "fields": [
-    {
-      "name": "Id",
-      "type": "string"
-    },
-    {
-      "name": "nombre",
-      "type": "string"
-    },
-    {
-      "name": "fecha",
-      "type": "string"
-    },
-    {
-      "name": "unidades",
-      "type": "int"
-    },
-    {
-      "name": "categoria",
-      "type": {
-        "type": "enum",
-        "name": "CategoriaEnumAvro",
-        "symbols": [
-          "GRANOS",
-          "LACTEOS",
-          "FRUTAS"
-        ]
-      }
-    },
-    {
-      "name": "disponible",
-      "type": "boolean"
-    }
-  ]
+    "type": "record",
+    "name": "ProductosAvro",
+    "namespace": "org.productos.avro",
+    "fields": [
+        {
+            "name": "Id",
+            "type": "string"
+        },
+        {
+            "name": "nombre",
+            "type": "string"
+        },
+        {
+            "name": "fecha",
+            "type": "string"
+        },
+        {
+            "name": "unidades",
+            "type": "int"
+        },
+        {
+            "name": "categoria",
+            "type": {
+                "type": "enum",
+                "name": "CategoriaEnumAvro",
+                "symbols": [
+                    "GRANOS",
+                    "LACTEOS",
+                    "FRUTAS"
+                ]
+            }
+        },
+        {
+            "name": "disponible",
+            "type": "boolean"
+        }
+    ]
 }
 
 # Definir la función de Azure
@@ -55,11 +54,13 @@ def procesar_avro(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Obtener el cuerpo del mensaje
         avro_data = req.get_body()
+        logging.info(f'Received Avro data: {avro_data}')
 
         # Leer el mensaje Avro
         bytes_reader = io.BytesIO(avro_data)
-        reader = fastavro.reader(bytes_reader, reader_options={'schema': AVRO_SCHEMA})
-        logging.info('Avro data read successfully.', reader)
+        reader = fastavro.reader(bytes_reader, reader_schema=AVRO_SCHEMA)
+        logging.info('Avro data read successfully.')
+
         # Procesar cada registro
         for record in reader:
             logging.info(f'Received record: {record}')
